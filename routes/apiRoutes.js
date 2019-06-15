@@ -6,7 +6,7 @@ const db = require("../models");
 
 
 var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
-mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
+mongoose.connect("mongodb://heroku_z5t7ssrv:bjntlv4rd6i1937e6803oh7ho1@ds137827.mlab.com", { useNewUrlParser: true });
 
 module.exports = function (app) {
 

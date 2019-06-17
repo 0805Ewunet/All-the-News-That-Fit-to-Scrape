@@ -7,7 +7,7 @@ const mongoose = require("mongoose");
 // Require all models
 
 const db = require("../models");
-
+// mongo conection
 var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/News";
 
 mongoose.connect(MONGODB_URI);

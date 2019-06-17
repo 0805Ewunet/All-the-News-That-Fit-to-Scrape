@@ -4,26 +4,29 @@ const cheerio = require("cheerio");
 
 const mongoose = require("mongoose");
 
-// Require all models
-
 const db = require("../models");
-// mongo conection
+
 var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/News";
 
 mongoose.connect(MONGODB_URI);
 
+
+
 module.exports = function (app) {
 
-  app.get('/', function (req, res) {
-    console.log("get /")
-    res.render("home")
-    // db.Article.find({saved: false}, function(err, data){
-    //   console.log(data, 'hey in base route')
-    //   res.render('home', { home: true, article : data });
 
-    // })
+
+  app.get('/', function (req, res) {
+
+    db.Article.find({saved: false}, function(err, data){
+      console.log(data, 'hey in base route')
+      res.render('home', { home: true, article : data });
+
+    })
 
   });
+
+
 
 
 
@@ -63,6 +66,10 @@ module.exports = function (app) {
 
   });
 
+
+
+ 
+
   app.delete("/api/headlines/:id", function(req, res){
 
     console.log('reqbody:' + JSON.stringify(req.params.id))
@@ -97,7 +104,6 @@ module.exports = function (app) {
 
     const $ = cheerio.load(response.data);
 
-
     $("article").each(function(i, element) {
 
       var result = {};
@@ -107,8 +113,6 @@ module.exports = function (app) {
       result.url = 'https://www.nytimes.com' + $(element).find("a").attr("href");
 
       result.summary = $(element).find("p").text().trim();
-
-
 
       if (result.headline !== '' && result.summary !== ''){
 

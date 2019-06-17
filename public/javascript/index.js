@@ -48,10 +48,6 @@ $(document).ready(function() {
   
       }
   
-      // Once we have all of the HTML for the articles stored in our articleCards array,
-  
-      // append them to the articleCards container
-  
       articleContainer.append(articleCards);
   
     }
@@ -59,12 +55,6 @@ $(document).ready(function() {
   
   
     function createCard(article) {
-  
-      // This function takes in a single JSON object for an article/headline
-  
-      // It constructs a jQuery element containing all of the formatted HTML for the
-  
-      // article card
   
       var card = $("<div class='card'>");
   
@@ -87,8 +77,6 @@ $(document).ready(function() {
   
   
       var cardBody = $("<div class='card-body'>").text(article.summary);
-  
-  
   
       card.append(cardHeader, cardBody);
   
@@ -220,14 +208,6 @@ $(document).ready(function() {
   
       $.get("/api/fetch").then(function(data) {
   
-        // If we are able to successfully scrape the NYTIMES and compare the articles to those
-  
-        // already in our collection, re render the articles on the page
-  
-        // and let the user know how many unique articles we were able to save
-  
-        // initPage();
-  
         console.log(data)
   
         // data.message = "Scrape completed!"
@@ -239,8 +219,6 @@ $(document).ready(function() {
       });
   
     }
-  
-  
   
     function handleArticleClear() {
   

@@ -10,11 +10,7 @@ var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/News";
 
 mongoose.connect(MONGODB_URI);
 
-
-
 module.exports = function (app) {
-
-
 
   app.get('/', function (req, res) {
 
@@ -40,8 +36,6 @@ module.exports = function (app) {
 
   });
 
-
-
   app.put("/api/headlines/:id", function(req, res){
 
     var saved = req.body.saved == 'true'
@@ -65,10 +59,6 @@ module.exports = function (app) {
     }
 
   });
-
-
-
- 
 
   app.delete("/api/headlines/:id", function(req, res){
 

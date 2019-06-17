@@ -16,12 +16,12 @@ module.exports = function (app) {
 
   app.get('/', function (req, res) {
     console.log("get /")
+    res.render("home")
+    // db.Article.find({saved: false}, function(err, data){
+    //   console.log(data, 'hey in base route')
+    //   res.render('home', { home: true, article : data });
 
-    db.Article.find({saved: false}, function(err, data){
-      console.log(data, 'hey in base route')
-      res.render('home', { home: true, article : data });
-
-    })
+    // })
 
   });
 

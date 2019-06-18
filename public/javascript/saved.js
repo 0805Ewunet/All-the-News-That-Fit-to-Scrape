@@ -1,397 +1,227 @@
 $(document).ready(function() {
+  var articleContainer = $(".article-container");
 
+  $(document).on("click", ".btn.delete", handleArticleDelete);
 
+  $(document).on("click", ".btn.notes", handleArticleNotes);
 
-    var articleContainer = $(".article-container");
+  $(document).on("click", ".btn.save", handleNoteSave);
 
+  $(document).on("click", ".btn.note-delete", handleNoteDelete);
 
+  $(".clear").on("click", handleArticleClear);
 
-    $(document).on("click", ".btn.delete", handleArticleDelete);
+  function initPage() {
+    $.get("/api/headlines?saved=true").then(function(data) {
+      articleContainer.empty();
 
-    $(document).on("click", ".btn.notes", handleArticleNotes);
-
-    $(document).on("click", ".btn.save", handleNoteSave);
-
-    $(document).on("click", ".btn.note-delete", handleNoteDelete);
-
-    $(".clear").on("click", handleArticleClear);
-
-  
-
-    function initPage() {
-
-
-
-      $.get("/api/headlines?saved=true").then(function(data) {
-
-        articleContainer.empty();
-
-
-
-        if (data && data.length) {
-
-          renderArticles(data);
-
-        } else {
-
-
-
-          renderEmpty();
-
-        }
-
-      });
-
-    }
-
-  
-
-    function renderArticles(articles) {
-
-
-
-      var articleCards = [];
-
- 
-
-      for (var i = 0; i < articles.length; i++) {
-
-        articleCards.push(createCard(articles[i]));
-
+      if (data && data.length) {
+        renderArticles(data);
+      } else {
+        renderEmpty();
       }
+    });
+  }
 
- 
+  function renderArticles(articles) {
+    var articleCards = [];
 
-      articleContainer.append(articleCards);
-
+    for (var i = 0; i < articles.length; i++) {
+      articleCards.push(createCard(articles[i]));
     }
 
-  
+    articleContainer.append(articleCards);
+  }
 
-    function createCard(article) {
+  function createCard(article) {
+    var card = $("<div class='card'>");
 
+    var cardHeader = $("<div class='card-header'>").append(
+      $("<h3>").append(
+        $("<a class='article-link' target='_blank' rel='noopener noreferrer'>")
+          .attr("href", article.url)
 
+          .text(article.headline),
 
-      var card = $("<div class='card'>");
+        $("<a class='btn btn-danger delete'>Delete From Saved</a>"),
 
-      var cardHeader = $("<div class='card-header'>").append(
+        $("<a class='btn btn-info notes'>Article Notes</a>")
+      )
+    );
 
-        $("<h3>").append(
+    var cardBody = $("<div class='card-body'>").text(article.summary);
 
-          $("<a class='article-link' target='_blank' rel='noopener noreferrer'>")
+    card.append(cardHeader, cardBody);
 
-            .attr("href", article.url)
+    card.data("_id", article._id);
 
-            .text(article.headline),
+    return card;
+  }
 
-          $("<a class='btn btn-danger delete'>Delete From Saved</a>"),
+  function renderEmpty() {
+    var emptyAlert = $(
+      [
+        "<div class='alert alert-warning text-center'>",
 
-          $("<a class='btn btn-info notes'>Article Notes</a>")
+        "<h4>Uh Oh. Looks like we don't have any saved articles.</h4>",
 
-        )
+        "</div>",
 
+        "<div class='card'>",
+
+        "<div class='card-header text-center'>",
+
+        "<h3>Would You Like to Browse Available Articles?</h3>",
+
+        "</div>",
+
+        "<div class='card-body text-center'>",
+
+        "<h4><a href='/'>Browse Articles</a></h4>",
+
+        "</div>",
+
+        "</div>"
+      ].join("")
+    );
+
+    articleContainer.append(emptyAlert);
+  }
+
+  function renderNotesList(data) {
+    var notesToRender = [];
+
+    var currentNote;
+
+    if (!data.notes.length) {
+      currentNote = $(
+        "<li class='list-group-item'>No notes for this article yet.</li>"
       );
 
-  
+      notesToRender.push(currentNote);
+    } else {
+      for (var i = 0; i < data.notes.length; i++) {
+        currentNote = $("<li class='list-group-item note'>")
+          .text(data.notes[i].noteText)
 
-      var cardBody = $("<div class='card-body'>").text(article.summary);
+          .append($("<button class='btn btn-danger note-delete'>x</button>"));
 
-  
-
-      card.append(cardHeader, cardBody);
-
-  
-
-
-
-      card.data("_id", article._id);
-
-
-
-      return card;
-
-    }
-
-  
-
-    function renderEmpty() {
-
-
-
-      var emptyAlert = $(
-
-        [
-
-          "<div class='alert alert-warning text-center'>",
-
-          "<h4>Uh Oh. Looks like we don't have any saved articles.</h4>",
-
-          "</div>",
-
-          "<div class='card'>",
-
-          "<div class='card-header text-center'>",
-
-          "<h3>Would You Like to Browse Available Articles?</h3>",
-
-          "</div>",
-
-          "<div class='card-body text-center'>",
-
-          "<h4><a href='/'>Browse Articles</a></h4>",
-
-          "</div>",
-
-          "</div>"
-
-        ].join("")
-
-      );
-
- 
-
-      articleContainer.append(emptyAlert);
-
-    }
-
-  
-
-    function renderNotesList(data) {
-
-
-
-      var notesToRender = [];
-
-      var currentNote;
-
-      if (!data.notes.length) {
-
-
-
-        currentNote = $("<li class='list-group-item'>No notes for this article yet.</li>");
+        currentNote.children("button").data("_id", data.notes[i]._id);
 
         notesToRender.push(currentNote);
-
-      } else {
-
-
-
-        for (var i = 0; i < data.notes.length; i++) {
-
-
-
-          currentNote = $("<li class='list-group-item note'>")
-
-            .text(data.notes[i].noteText)
-
-            .append($("<button class='btn btn-danger note-delete'>x</button>"));
-
- 
-
-          currentNote.children("button").data("_id", data.notes[i]._id);
-
-
-
-          notesToRender.push(currentNote);
-
-        }
-
       }
-
-
-
-      $(".note-container").append(notesToRender);
-
     }
 
-  
+    $(".note-container").append(notesToRender);
+  }
 
-    function handleArticleDelete() {
+  function handleArticleDelete() {
+    var articleToDelete = $(this)
+      .parents(".card")
 
+      .data();
 
+    $(this)
+      .parents(".card")
 
-      var articleToDelete = $(this)
+      .remove();
 
-        .parents(".card")
+    console.log(articleToDelete._id);
 
-        .data();
+    $.ajax({
+      method: "DELETE",
 
-  
+      url: "/api/headlines/" + articleToDelete._id
+    }).then(function(data) {
+      if (data) {
+        window.load = "/saved";
+      }
+    });
+  }
 
-      $(this)
+  function handleArticleNotes(event) {
+    var currentArticle = $(this)
+      .parents(".card")
 
-        .parents(".card")
+      .data();
 
-        .remove();
+    console.log(currentArticle);
 
+    $.get("/api/notes/" + currentArticle._id).then(function(data) {
+      console.log(data);
 
+      var modalText = $("<div class='container-fluid text-center'>").append(
+        $("<h4>").text("Notes For Article: " + currentArticle._id),
 
-      console.log(articleToDelete._id)
+        $("<hr>"),
 
-      $.ajax({
+        $("<ul class='list-group note-container'>"),
 
-        method: "DELETE",
+        $("<textarea placeholder='New Note' rows='4' cols='60'>"),
 
-        url: "/api/headlines/" + articleToDelete._id
+        $("<button class='btn btn-success save'>Save Note</button>")
+      );
 
-      }).then(function(data) {
+      console.log(modalText);
 
+      bootbox.dialog({
+        message: modalText,
 
-
-        if (data) {
-
-        
-
-          window.load = "/saved"
-
-        }
-
+        closeButton: true
       });
 
-    }
+      var noteData = {
+        _id: currentArticle._id,
 
-    function handleArticleNotes(event) {
+        notes: data || []
+      };
 
+      console.log("noteData:" + JSON.stringify(noteData));
 
+      $(".btn.save").data("article", noteData);
 
-      var currentArticle = $(this)
+      renderNotesList(noteData);
+    });
+  }
 
-        .parents(".card")
+  function handleNoteSave() {
+    var noteData;
 
-        .data();
+    var newNote = $(".bootbox-body textarea")
+      .val()
 
-      console.log(currentArticle)
+      .trim();
 
+    if (newNote) {
+      noteData = {
+        _headlineId: $(this).data("article")._id,
+        noteText: newNote
+      };
 
-
-      $.get("/api/notes/" + currentArticle._id).then(function(data) {
-
-        console.log(data)
-
-
-
-        var modalText = $("<div class='container-fluid text-center'>").append(
-
-          $("<h4>").text("Notes For Article: " + currentArticle._id),
-
-          $("<hr>"),
-
-          $("<ul class='list-group note-container'>"),
-
-          $("<textarea placeholder='New Note' rows='4' cols='60'>"),
-
-          $("<button class='btn btn-success save'>Save Note</button>")
-
-        );
-
-        console.log(modalText)
-
-
-
-        bootbox.dialog({
-
-          message: modalText,
-
-          closeButton: true
-
-        });
-
-        var noteData = {
-
-          _id: currentArticle._id,
-
-          notes: data || []
-
-        };
-
-        console.log('noteData:' + JSON.stringify(noteData))
-
- 
-
-        $(".btn.save").data("article", noteData);
-
-
-
-        renderNotesList(noteData);
-
-      });
-
-    }
-
-  
-
-    function handleNoteSave() {
-
- 
-
-      var noteData;
-
-      var newNote = $(".bootbox-body textarea")
-
-        .val()
-
-        .trim();
-
-
-
-      if (newNote) {
-
-        noteData = { _headlineId: $(this).data("article")._id, noteText: newNote };
-
-        $.post("/api/notes", noteData).then(function() {
-
-         
-
-          bootbox.hideAll();
-
-        });
-
-      }
-
-    }
-
-  
-
-    function handleNoteDelete() {
-
-
-
-      var noteToDelete = $(this).data("_id");
-
-
-
-      $.ajax({
-
-        url: "/api/notes/" + noteToDelete,
-
-        method: "DELETE"
-
-      }).then(function() {
-
-     
-
+      $.post("/api/notes", noteData).then(function() {
         bootbox.hideAll();
-
       });
-
     }
+  }
 
-  
+  function handleNoteDelete() {
+    var noteToDelete = $(this).data("_id");
 
-    function handleArticleClear() {
+    $.ajax({
+      url: "/api/notes/" + noteToDelete,
 
-      $.get("api/clear")
+      method: "DELETE"
+    }).then(function() {
+      bootbox.hideAll();
+    });
+  }
 
-        .then(function(data) {
+  function handleArticleClear() {
+    $.get("api/clear")
+    .then(function(data) {
+      articleContainer.empty();
 
-          articleContainer.empty();
-
-        
-
-          location.reload();
-
-        });
-
-    }
-
-  });
+      location.reload();
+    });
+  }
+});
